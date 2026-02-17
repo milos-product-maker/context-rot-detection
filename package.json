@@ -1,0 +1,61 @@
+{
+  "name": "context-rot-detection",
+  "version": "0.1.0",
+  "description": "Context Rot Detection & Healing MCP Service — gives AI agents self-awareness about their cognitive state",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "context-rot-detection": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "dist/**/*.js.map",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "context-rot",
+    "ai-agents",
+    "context-window",
+    "agent-health",
+    "llm",
+    "context-engineering"
+  ],
+  "author": "Milos Borenovic",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/milos-product-maker/context-rot-detection"
+  },
+  "homepage": "https://github.com/milos-product-maker/context-rot-detection#readme",
+  "bugs": {
+    "url": "https://github.com/milos-product-maker/context-rot-detection/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "better-sqlite3": "^11.8.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.13.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.18"
+  }
+}

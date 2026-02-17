@@ -1,0 +1,39 @@
+{
+  "name": "context-rot-detection",
+  "description": "Context Rot Detection & Healing — gives AI agents self-awareness about their cognitive state by analyzing token utilization, quality degradation, and session fatigue.",
+  "version": "0.1.0",
+  "tools": [
+    {
+      "name": "check_my_health",
+      "description": "Analyze your current context window health. Returns a health score (0-100), token utilization, estimated quality degradation, and recommendations for recovery."
+    },
+    {
+      "name": "get_health_history",
+      "description": "Retrieve health check history for an agent. Returns recent health checks and aggregate statistics."
+    },
+    {
+      "name": "get_service_stats",
+      "description": "Get service-wide utilization statistics: total calls, unique agents, model distribution, health score averages, and recent activity."
+    }
+  ],
+  "install": {
+    "npm": "context-rot-detection",
+    "npx": "context-rot-detection",
+    "docker": "ghcr.io/milos-product-maker/context-rot-detection:latest"
+  },
+  "config": {
+    "command": "npx",
+    "args": ["-y", "context-rot-detection"],
+    "env": {
+      "HEALTH_HISTORY_DB": {
+        "description": "Path to SQLite database for health history persistence",
+        "default": ":memory:",
+        "required": false
+      },
+      "LOG_FILE": {
+        "description": "Path to append structured JSON log lines",
+        "required": false
+      }
+    }
+  }
+}

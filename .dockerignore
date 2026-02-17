@@ -1,0 +1,17 @@
+node_modules/
+dist/
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.tgz
+.git/
+.gitignore
+.npmignore
+.DS_Store
+.claude/
+.vscode/
+.idea/
+README.md
+LICENSE
+PROJECT.md
