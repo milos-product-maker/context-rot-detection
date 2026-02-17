@@ -1,6 +1,6 @@
 {
   "name": "context-rot-detection",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Context Rot Detection & Healing MCP Service — gives AI agents self-awareness about their cognitive state",
   "type": "module",
   "main": "dist/index.js",
