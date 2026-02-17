@@ -28,3 +28,6 @@ Thumbs.db
 
 # npm pack output
 *.tgz
+
+# Smithery build artifacts
+.smithery/
