@@ -1,6 +1,6 @@
 {
   "name": "context-rot-detection",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Context Rot Detection & Healing MCP Service — gives AI agents self-awareness about their cognitive state. Supports 15+ curated models and auto-resolves any HuggingFace model.",
   "type": "module",
   "main": "dist/index.js",
