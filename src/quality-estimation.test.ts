@@ -3,8 +3,8 @@ import { assessHealth } from "./quality-estimation.js";
 
 describe("assessHealth", () => {
   describe("healthy scenarios", () => {
-    it("fresh session with low tokens is healthy", () => {
-      const result = assessHealth({
+    it("fresh session with low tokens is healthy", async () => {
+      const result = await assessHealth({
         tokenCount: 5_000,
         model: "claude-opus-4",
       });
@@ -12,8 +12,8 @@ describe("assessHealth", () => {
       expect(result.health_score).toBeGreaterThanOrEqual(90);
     });
 
-    it("mid-session with moderate tokens is still healthy", () => {
-      const result = assessHealth({
+    it("mid-session with moderate tokens is still healthy", async () => {
+      const result = await assessHealth({
         tokenCount: 80_000,
         model: "claude-opus-4",
         sessionDurationMinutes: 10,
@@ -25,8 +25,8 @@ describe("assessHealth", () => {
   });
 
   describe("warning scenarios", () => {
-    it("in the danger zone with session fatigue triggers warning", () => {
-      const result = assessHealth({
+    it("in the danger zone with session fatigue triggers warning", async () => {
+      const result = await assessHealth({
         tokenCount: 170_000,
         model: "claude-opus-4",
         sessionDurationMinutes: 60,
@@ -39,8 +39,8 @@ describe("assessHealth", () => {
   });
 
   describe("danger scenarios", () => {
-    it("deep in danger zone is danger", () => {
-      const result = assessHealth({
+    it("deep in danger zone is danger", async () => {
+      const result = await assessHealth({
         tokenCount: 190_000,
         model: "claude-opus-4",
         sessionDurationMinutes: 120,
@@ -52,8 +52,8 @@ describe("assessHealth", () => {
   });
 
   describe("token utilization", () => {
-    it("reports correct danger zone for the model", () => {
-      const result = assessHealth({
+    it("reports correct danger zone for the model", async () => {
+      const result = await assessHealth({
         tokenCount: 50_000,
         model: "claude-opus-4",
       });
@@ -61,8 +61,8 @@ describe("assessHealth", () => {
       expect(result.token_utilization.current).toBe(50_000);
     });
 
-    it("calculates percentage relative to danger zone", () => {
-      const result = assessHealth({
+    it("calculates percentage relative to danger zone", async () => {
+      const result = await assessHealth({
         tokenCount: 85_000,
         model: "claude-opus-4",
       });
@@ -72,8 +72,8 @@ describe("assessHealth", () => {
   });
 
   describe("unknown model fallback", () => {
-    it("uses conservative 'other' profile for unknown models", () => {
-      const result = assessHealth({
+    it("uses conservative 'other' profile for unknown models", async () => {
+      const result = await assessHealth({
         tokenCount: 90_000,
         model: "llama-4",
       });
@@ -84,8 +84,8 @@ describe("assessHealth", () => {
   });
 
   describe("tool-call burden", () => {
-    it("low tool calls have low burden", () => {
-      const result = assessHealth({
+    it("low tool calls have low burden", async () => {
+      const result = await assessHealth({
         tokenCount: 10_000,
         model: "claude-opus-4",
         toolCallsCount: 3,
@@ -93,8 +93,8 @@ describe("assessHealth", () => {
       expect(result.session_fatigue.tool_call_burden).toBe("low");
     });
 
-    it("high tool calls have high burden", () => {
-      const result = assessHealth({
+    it("high tool calls have high burden", async () => {
+      const result = await assessHealth({
         tokenCount: 10_000,
         model: "claude-opus-4",
         toolCallsCount: 25,
@@ -102,8 +102,8 @@ describe("assessHealth", () => {
       expect(result.session_fatigue.tool_call_burden).toBe("high");
     });
 
-    it("very high tool calls have critical burden", () => {
-      const result = assessHealth({
+    it("very high tool calls have critical burden", async () => {
+      const result = await assessHealth({
         tokenCount: 10_000,
         model: "claude-opus-4",
         toolCallsCount: 50,
@@ -113,8 +113,8 @@ describe("assessHealth", () => {
   });
 
   describe("session length risk", () => {
-    it("short session is low risk", () => {
-      const result = assessHealth({
+    it("short session is low risk", async () => {
+      const result = await assessHealth({
         tokenCount: 10_000,
         model: "claude-opus-4",
         sessionDurationMinutes: 5,
@@ -122,8 +122,8 @@ describe("assessHealth", () => {
       expect(result.session_fatigue.session_length_risk).toBe("low");
     });
 
-    it("long session is high risk", () => {
-      const result = assessHealth({
+    it("long session is high risk", async () => {
+      const result = await assessHealth({
         tokenCount: 10_000,
         model: "claude-opus-4",
         sessionDurationMinutes: 60,
@@ -133,8 +133,8 @@ describe("assessHealth", () => {
   });
 
   describe("quality estimate", () => {
-    it("low tokens have excellent retrieval", () => {
-      const result = assessHealth({
+    it("low tokens have excellent retrieval", async () => {
+      const result = await assessHealth({
         tokenCount: 5_000,
         model: "claude-opus-4",
       });
@@ -143,8 +143,8 @@ describe("assessHealth", () => {
       expect(result.quality_estimate.estimated_hallucination_risk).toBe("low");
     });
 
-    it("high tokens degrade retrieval and increase hallucination risk", () => {
-      const result = assessHealth({
+    it("high tokens degrade retrieval and increase hallucination risk", async () => {
+      const result = await assessHealth({
         tokenCount: 180_000,
         model: "claude-opus-4",
       });
@@ -158,8 +158,8 @@ describe("assessHealth", () => {
   });
 
   describe("optional parameters", () => {
-    it("works with only token_count and model", () => {
-      const result = assessHealth({
+    it("works with only token_count and model", async () => {
+      const result = await assessHealth({
         tokenCount: 50_000,
         model: "claude-opus-4",
       });
@@ -168,8 +168,8 @@ describe("assessHealth", () => {
       expect(result.session_fatigue.session_length_risk).toBe("low");
     });
 
-    it("works with only token_count (defaults model to 'other')", () => {
-      const result = assessHealth({
+    it("works with only token_count (defaults model to 'other')", async () => {
+      const result = await assessHealth({
         tokenCount: 50_000,
         model: "other",
       });

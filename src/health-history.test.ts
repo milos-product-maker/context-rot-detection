@@ -11,8 +11,8 @@ describe("HealthHistoryStore", () => {
   });
 
   describe("health check recording", () => {
-    it("records and retrieves a health check", () => {
-      const assessment = assessHealth({ tokenCount: 50_000, model: "claude-opus-4" });
+    it("records and retrieves a health check", async () => {
+      const assessment = await assessHealth({ tokenCount: 50_000, model: "claude-opus-4" });
       const recs = generateRecommendations(assessment);
 
       const id = store.record("agent-1", "claude-opus-4", 5, 10, assessment, recs);
@@ -29,8 +29,8 @@ describe("HealthHistoryStore", () => {
       expect(history).toHaveLength(0);
     });
 
-    it("respects the limit parameter", () => {
-      const assessment = assessHealth({ tokenCount: 50_000, model: "claude-opus-4" });
+    it("respects the limit parameter", async () => {
+      const assessment = await assessHealth({ tokenCount: 50_000, model: "claude-opus-4" });
       const recs = generateRecommendations(assessment);
 
       for (let i = 0; i < 10; i++) {
@@ -47,13 +47,13 @@ describe("HealthHistoryStore", () => {
       expect(store.getAgentStats("nonexistent")).toBeNull();
     });
 
-    it("calculates correct aggregate stats", () => {
+    it("calculates correct aggregate stats", async () => {
       // Record a healthy check
-      const healthy = assessHealth({ tokenCount: 10_000, model: "claude-opus-4" });
+      const healthy = await assessHealth({ tokenCount: 10_000, model: "claude-opus-4" });
       store.record("agent-1", "claude-opus-4", 2, 5, healthy, []);
 
       // Record a danger check
-      const danger = assessHealth({
+      const danger = await assessHealth({
         tokenCount: 195_000,
         model: "claude-opus-4",
         toolCallsCount: 40,

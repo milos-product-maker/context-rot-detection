@@ -252,6 +252,10 @@ export class HealthHistoryStore {
     };
   }
 
+  getDb(): Database.Database {
+    return this.db;
+  }
+
   close(): void {
     this.db.close();
   }

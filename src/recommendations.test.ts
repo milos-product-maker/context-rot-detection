@@ -3,8 +3,8 @@ import { assessHealth } from "./quality-estimation.js";
 import { generateRecommendations } from "./recommendations.js";
 
 describe("generateRecommendations", () => {
-  it("returns 'continue' for a healthy session", () => {
-    const assessment = assessHealth({
+  it("returns 'continue' for a healthy session", async () => {
+    const assessment = await assessHealth({
       tokenCount: 5_000,
       model: "claude-opus-4",
       toolCallsCount: 2,
@@ -16,8 +16,8 @@ describe("generateRecommendations", () => {
     expect(recs[0].priority).toBe("low");
   });
 
-  it("recommends compact_context when approaching danger zone", () => {
-    const assessment = assessHealth({
+  it("recommends compact_context when approaching danger zone", async () => {
+    const assessment = await assessHealth({
       tokenCount: 150_000,
       model: "claude-opus-4",
     });
@@ -27,8 +27,8 @@ describe("generateRecommendations", () => {
     expect(["high", "critical"]).toContain(compactRec!.priority);
   });
 
-  it("recommends immediate_context_reset when past danger zone", () => {
-    const assessment = assessHealth({
+  it("recommends immediate_context_reset when past danger zone", async () => {
+    const assessment = await assessHealth({
       tokenCount: 195_000,
       model: "claude-opus-4",
     });
@@ -38,9 +38,9 @@ describe("generateRecommendations", () => {
     expect(resetRec!.priority).toBe("critical");
   });
 
-  it("recommends offload_to_memory when middle content risk is high", () => {
+  it("recommends offload_to_memory when middle content risk is high", async () => {
     // At 160K tokens with opus-4 (maxTokens 200K), ratio = 0.8 → high/critical middle risk
-    const assessment = assessHealth({
+    const assessment = await assessHealth({
       tokenCount: 160_000,
       model: "claude-opus-4",
     });
@@ -49,8 +49,8 @@ describe("generateRecommendations", () => {
     expect(memoryRec).toBeDefined();
   });
 
-  it("recommends break_into_subtasks for high tool call burden", () => {
-    const assessment = assessHealth({
+  it("recommends break_into_subtasks for high tool call burden", async () => {
+    const assessment = await assessHealth({
       tokenCount: 10_000,
       model: "claude-opus-4",
       toolCallsCount: 35,
@@ -60,8 +60,8 @@ describe("generateRecommendations", () => {
     expect(subtaskRec).toBeDefined();
   });
 
-  it("recommends session_checkpoint for long sessions", () => {
-    const assessment = assessHealth({
+  it("recommends session_checkpoint for long sessions", async () => {
+    const assessment = await assessHealth({
       tokenCount: 10_000,
       model: "claude-opus-4",
       sessionDurationMinutes: 120,
@@ -71,9 +71,9 @@ describe("generateRecommendations", () => {
     expect(checkpointRec).toBeDefined();
   });
 
-  it("recommends verify_outputs when hallucination risk is high", () => {
+  it("recommends verify_outputs when hallucination risk is high", async () => {
     // High tokens + high tool calls → elevated hallucination risk
-    const assessment = assessHealth({
+    const assessment = await assessHealth({
       tokenCount: 185_000,
       model: "claude-opus-4",
       toolCallsCount: 35,
@@ -83,8 +83,8 @@ describe("generateRecommendations", () => {
     expect(verifyRec).toBeDefined();
   });
 
-  it("sorts recommendations by priority (critical first)", () => {
-    const assessment = assessHealth({
+  it("sorts recommendations by priority (critical first)", async () => {
+    const assessment = await assessHealth({
       tokenCount: 195_000,
       model: "claude-opus-4",
       toolCallsCount: 40,
@@ -101,8 +101,8 @@ describe("generateRecommendations", () => {
     }
   });
 
-  it("every recommendation has a positive or zero quality gain", () => {
-    const assessment = assessHealth({
+  it("every recommendation has a positive or zero quality gain", async () => {
+    const assessment = await assessHealth({
       tokenCount: 185_000,
       model: "claude-opus-4",
       toolCallsCount: 30,

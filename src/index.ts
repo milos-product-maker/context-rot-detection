@@ -13,7 +13,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-import { assessHealth } from "./quality-estimation.js";
+import { assessHealth, type ModelProfileResolver } from "./quality-estimation.js";
 import { generateRecommendations } from "./recommendations.js";
 import type { HealthHistoryStore } from "./health-history.js";
 import { log, logToolCall } from "./logger.js";
@@ -26,8 +26,12 @@ let historyStore: HealthHistoryStore | null = null;
 /**
  * Create an MCP server with all tools registered.
  * The store parameter is optional — when null, history/metrics are silently skipped.
+ * The resolver parameter enables runtime HuggingFace model profile resolution.
  */
-function createServer(store: HealthHistoryStore | null = null): McpServer {
+function createServer(
+  store: HealthHistoryStore | null = null,
+  resolver?: ModelProfileResolver,
+): McpServer {
   const server = new McpServer({
     name: "context-rot-detection",
     version: "0.1.0",
@@ -65,7 +69,7 @@ function createServer(store: HealthHistoryStore | null = null): McpServer {
         .string()
         .optional()
         .describe(
-          `The LLM model you're running on. Known models with tuned profiles: ${KNOWN_MODELS.join(", ")}. Any other string is accepted and falls back to conservative defaults.`,
+          `The LLM model you're running on. Known models with tuned profiles: ${KNOWN_MODELS.join(", ")}. You can also pass a HuggingFace repo ID (e.g., "meta-llama/Llama-3.1-70B-Instruct") and the context window will be auto-detected. Any other string falls back to conservative defaults.`,
         ),
       agent_id: z
         .string()
@@ -82,13 +86,13 @@ function createServer(store: HealthHistoryStore | null = null): McpServer {
       const sessionDurationMinutes = params.session_duration_minutes ?? 0;
 
       // Run health assessment
-      const assessment = assessHealth({
+      const assessment = await assessHealth({
         tokenCount: params.token_count,
         model,
         sessionDurationMinutes,
         toolCallsCount,
         contextSummary: params.context_summary,
-      });
+      }, resolver);
 
       // Generate recommendations
       const recommendations = generateRecommendations(assessment);
@@ -281,12 +285,15 @@ export function createSandboxServer(): McpServer {
 
 // Start the server (only when executed directly, not when imported by Smithery)
 async function main(): Promise<void> {
-  // Dynamic import so better-sqlite3 is only loaded at runtime, not at scan time
+  // Dynamic imports so native modules are only loaded at runtime, not at scan time
   const { HealthHistoryStore } = await import("./health-history.js");
+  const { HuggingFaceResolver } = await import("./huggingface-resolver.js");
+
   const historyDbPath = process.env.HEALTH_HISTORY_DB ?? ":memory:";
   historyStore = new HealthHistoryStore(historyDbPath);
 
-  const server = createServer(historyStore);
+  const resolver = new HuggingFaceResolver(historyStore.getDb());
+  const server = createServer(historyStore, resolver);
   const transport = new StdioServerTransport();
   await server.connect(transport);
   log("info", "server_started", {

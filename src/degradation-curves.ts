@@ -170,6 +170,26 @@ export function getModelProfile(model: string): ModelProfile {
 }
 
 /**
+ * Generate a conservative ModelProfile from a context window size.
+ *
+ * Used for models resolved at runtime (e.g., from HuggingFace) where we
+ * know the max tokens but not the empirical degradation characteristics.
+ */
+export function generateHeuristicProfile(
+  name: string,
+  maxTokens: number,
+): ModelProfile {
+  return {
+    name,
+    maxTokens,
+    degradationOnset: Math.round(maxTokens * 0.65),
+    dangerZone: Math.round(maxTokens * 0.80),
+    middleLossCoefficient: 0.40,
+    baseRetrievalAccuracy: 0.90,
+  };
+}
+
+/**
  * Calculate the quality multiplier (0-1) based on current token usage.
  *
  * Uses a sigmoid-like curve:

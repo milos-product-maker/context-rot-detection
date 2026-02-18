@@ -3,6 +3,7 @@ import {
   getModelProfile,
   calculateQualityMultiplier,
   estimateRetrievalAccuracy,
+  generateHeuristicProfile,
   KNOWN_MODELS,
 } from "./degradation-curves.js";
 
@@ -94,5 +95,31 @@ describe("estimateRetrievalAccuracy", () => {
     const pureQuality = opus4.baseRetrievalAccuracy * qualityMult;
     // With middle loss, result should be below pure quality * base accuracy
     expect(atDanger).toBeLessThan(pureQuality);
+  });
+});
+
+describe("generateHeuristicProfile", () => {
+  it("generates correct heuristic ratios", () => {
+    const profile = generateHeuristicProfile("test/model", 131_072);
+    expect(profile.name).toBe("test/model");
+    expect(profile.maxTokens).toBe(131_072);
+    expect(profile.degradationOnset).toBe(Math.round(131_072 * 0.65));
+    expect(profile.dangerZone).toBe(Math.round(131_072 * 0.80));
+    expect(profile.middleLossCoefficient).toBe(0.40);
+    expect(profile.baseRetrievalAccuracy).toBe(0.90);
+  });
+
+  it("works with large context windows (1M+)", () => {
+    const profile = generateHeuristicProfile("big/model", 1_000_000);
+    expect(profile.maxTokens).toBe(1_000_000);
+    expect(profile.degradationOnset).toBe(650_000);
+    expect(profile.dangerZone).toBe(800_000);
+  });
+
+  it("works with small context windows", () => {
+    const profile = generateHeuristicProfile("small/model", 2_048);
+    expect(profile.maxTokens).toBe(2_048);
+    expect(profile.degradationOnset).toBe(Math.round(2_048 * 0.65));
+    expect(profile.dangerZone).toBe(Math.round(2_048 * 0.80));
   });
 });

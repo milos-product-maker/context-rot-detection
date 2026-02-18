@@ -197,11 +197,25 @@ function scoreToStatus(score: number): HealthStatus {
   return "danger";
 }
 
+/** Interface for model profile resolvers (e.g., HuggingFaceResolver). */
+export interface ModelProfileResolver {
+  resolveModelProfile(model: string): Promise<ModelProfile>;
+}
+
 /**
  * Main assessment function — the core of the quality estimation engine.
+ *
+ * When a resolver is provided, unknown models can be resolved at runtime
+ * (e.g., from HuggingFace). Without a resolver, falls back to the
+ * curated static profiles.
  */
-export function assessHealth(input: AssessmentInput): HealthAssessment {
-  const profile = getModelProfile(input.model);
+export async function assessHealth(
+  input: AssessmentInput,
+  resolver?: ModelProfileResolver,
+): Promise<HealthAssessment> {
+  const profile = resolver
+    ? await resolver.resolveModelProfile(input.model)
+    : getModelProfile(input.model);
   const toolCallsCount = input.toolCallsCount ?? 0;
   const sessionDurationMinutes = input.sessionDurationMinutes ?? 0;
 
