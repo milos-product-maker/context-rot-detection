@@ -9,7 +9,8 @@ An agent experiencing context rot doesn't *know* it's degrading — it just star
 ## Features
 
 - **Health score (0–100)** based on token utilization, retrieval accuracy, and session fatigue
-- **Model-specific degradation curves** for 15+ models (Claude, GPT, Gemini, o-series)
+- **Model-specific degradation curves** for 15+ curated models (Claude, GPT, Gemini, o-series)
+- **Auto-resolves any HuggingFace model** — pass a repo ID like `meta-llama/Llama-3.1-70B` and the context window is detected automatically, with results cached in SQLite
 - **Lost-in-the-middle risk scoring** based on Stanford research
 - **Tool-call burden** and **session fatigue** analysis
 - **Actionable recovery recommendations** — compact context, offload to memory, checkpoint, break into subtasks
@@ -104,7 +105,7 @@ Analyze the current context window health. Call this periodically during long se
 | Parameter | Type | Required | Description |
 |---|---|---|---|
 | `token_count` | integer | Yes | Current estimated token count in context window |
-| `model` | string | No | LLM model identifier (e.g., `claude-opus-4`, `gpt-4o`) |
+| `model` | string | No | LLM model identifier — a curated name (e.g., `claude-opus-4`, `gpt-4o`), a HuggingFace repo ID (e.g., `meta-llama/Llama-3.1-70B`), or any string (falls back to conservative defaults) |
 | `session_duration_minutes` | integer | No | How long this session has been running |
 | `tool_calls_count` | integer | No | Number of tool calls made in this session |
 | `context_summary` | string | No | Brief summary of current task and recent actions |
@@ -186,7 +187,26 @@ Returns total calls, unique agents, average health score, model distribution, st
 | `gemini-2.5-flash` | 1M | 520K | Medium–High |
 | `gemini-2.0-flash` | 1M | 500K | High |
 
-Any unrecognized model string falls back to conservative defaults (128K max, 100K danger zone).
+### HuggingFace Auto-Resolution
+
+Any model string containing `/` is treated as a HuggingFace repo ID. The server fetches `config.json` from the repo, extracts the context window size (`max_position_embeddings`, `n_positions`, or `max_seq_len`), and generates a conservative degradation profile:
+
+- **65%** of max tokens → degradation onset
+- **80%** of max tokens → danger zone
+
+Results are cached in SQLite — subsequent lookups are instant.
+
+```
+model: "meta-llama/Llama-3.1-70B"       → 131K context, danger at 105K
+model: "mistralai/Mistral-7B-v0.1"      → 32K context, danger at 26K
+model: "mosaicml/mpt-7b"                → 65K context, danger at 52K
+```
+
+If the fetch fails (network error, gated model, missing config), the server falls back silently to conservative defaults.
+
+### Fallback
+
+Any unrecognized model string without `/` falls back to conservative defaults (128K max, 100K danger zone).
 
 ## How It Works
 

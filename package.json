@@ -1,7 +1,7 @@
 {
   "name": "context-rot-detection",
   "version": "0.1.2",
-  "description": "Context Rot Detection & Healing MCP Service — gives AI agents self-awareness about their cognitive state",
+  "description": "Context Rot Detection & Healing MCP Service — gives AI agents self-awareness about their cognitive state. Supports 15+ curated models and auto-resolves any HuggingFace model.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -34,7 +34,9 @@
     "context-window",
     "agent-health",
     "llm",
-    "context-engineering"
+    "context-engineering",
+    "huggingface",
+    "model-profiles"
   ],
   "author": "Milos Borenovic",
   "license": "MIT",
